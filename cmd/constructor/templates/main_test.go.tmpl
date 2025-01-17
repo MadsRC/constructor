@@ -1,0 +1,86 @@
+package {{.PackageName}}
+
+import (
+	"io"
+	"log/slog"
+	"testing"
+)
+
+func TestNew{{title .Name}}(t *testing.T) {
+	discardLogger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	tests := []struct {
+		name    string
+		options []{{.Name}}Option
+		want    *{{ .Name }}
+		wantErr bool
+	}{
+		{
+			name:    "Create with default logger",
+			options: []{{.Name}}Option{},
+			want: &{{ .Name }}{
+				options: &{{lower_first_letter .Name}}Options{
+					Logger: slog.Default(),
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "Create with custom logger",
+			options: []{{.Name}}Option{WithLogger(discardLogger)},
+			want: &{{ .Name }}{
+				options: &{{lower_first_letter .Name}}Options{
+					Logger: discardLogger,
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := New{{title .Name}}(tt.options...)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("New{{title .Name}}() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got.options.Logger != tt.want.options.Logger {
+				t.Errorf("New{{title .Name}}() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNew{{title .Name}}_GlobalOptions(t *testing.T) {
+	tests := []struct {
+		name        string
+		options     []{{.Name}}Option
+		inputLogger *slog.Logger
+	}{
+		{
+			name:        "Global options are applied",
+			options:     []{{.Name}}Option{},
+			inputLogger: slog.New(slog.NewTextHandler(io.Discard, nil)),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			Global{{.Name}}Options = []{{.Name}}Option{
+				WithLogger(tt.inputLogger),
+			}
+			got1, _ := New{{title .Name}}(tt.options...)
+			got2, _ := New{{title .Name}}(tt.options...)
+			if got1.options.Logger != tt.inputLogger {
+				t.Errorf("New{{title .Name}}() = %v, want %v", got1, tt.inputLogger)
+			}
+			if got2.options.Logger != tt.inputLogger {
+				t.Errorf("New{{title .Name}}() = %v, want %v", got2, tt.inputLogger)
+			}
+			if got1.options.Logger != got2.options.Logger {
+				t.Errorf("New{{title .Name}}() = %v, want %v", got1, got2)
+			}
+			Global{{.Name}}Options = []{{.Name}}Option{}
+			got3, _ := New{{title .Name}}(tt.options...)
+			if got3.options.Logger == tt.inputLogger {
+				t.Errorf("New{{title .Name}}() = %v, want %v", got3, slog.Default())
+			}
+		})
+	}
+}
