@@ -27,7 +27,7 @@ func main() {
 				Value: "Client",
 			},
 			&cli.StringFlag{
-				Name:  "package_name",
+				Name:  "package",
 				Usage: "name of the package the generated code should belong to",
 				Value: "main",
 			},
@@ -58,8 +58,8 @@ func mainAction(c *cli.Context) error {
 	if c.String("name") == "" {
 		return fmt.Errorf("provided \"name\" value is invalid: '%s' - Use '--name' to set it", c.String("name"))
 	}
-	if c.String("package_name") == "" {
-		return fmt.Errorf("provided \"package_name\" value is invalid: '%s' - Use '--package_name' to set it", c.String("package_name"))
+	if c.String("package") == "" {
+		return fmt.Errorf("provided \"package\" value is invalid: '%s' - Use '--package' to set it", c.String("package"))
 	}
 	funcMap := template.FuncMap{
 		"title": func(s string) string {
@@ -79,7 +79,7 @@ func mainAction(c *cli.Context) error {
 	}
 
 	input := tmplInput{
-		PackageName: c.String("package_name"),
+		PackageName: c.String("package"),
 		Name:        c.String("name"),
 	}
 

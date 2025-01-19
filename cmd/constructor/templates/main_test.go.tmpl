@@ -26,7 +26,7 @@ func TestNew{{title .Name}}(t *testing.T) {
 		},
 		{
 			name:    "Create with custom logger",
-			options: []{{.Name}}Option{WithLogger(discardLogger)},
+			options: []{{.Name}}Option{With{{title .Name}}Logger(discardLogger)},
 			want: &{{ .Name }}{
 				options: &{{lower_first_letter .Name}}Options{
 					Logger: discardLogger,
@@ -63,7 +63,7 @@ func TestNew{{title .Name}}_GlobalOptions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			Global{{.Name}}Options = []{{.Name}}Option{
-				WithLogger(tt.inputLogger),
+				With{{title .Name}}Logger(tt.inputLogger),
 			}
 			got1, _ := New{{title .Name}}(tt.options...)
 			got2, _ := New{{title .Name}}(tt.options...)

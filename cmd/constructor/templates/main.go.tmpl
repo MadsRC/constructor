@@ -31,7 +31,7 @@ var default{{title .Name}}Options = {{lower_first_letter .Name}}Options{
 	Logger:  slog.Default(),
 }
 
-// GlobalClientOptions is a list of [ClientOption]s that are applied to all [Client]s.
+// Global{{title .Name}}Options is a list of [ClientOption]s that are applied to all [Client]s.
 var Global{{title .Name}}Options []{{.Name}}Option
 
 // {{.Name}}Option is an option for configuring a [{{.Name}}].
@@ -55,8 +55,8 @@ func newFunc{{.Name}}Option(f func(*{{lower_first_letter .Name}}Options)) *func{
 	}
 }
 
-// WithLogger returns a [{{.Name}}Option] that uses the provided logger.
-func WithLogger(logger *slog.Logger) {{.Name}}Option {
+// With{{title .Name}}Logger returns a [{{.Name}}Option] that uses the provided logger.
+func With{{title .Name}}Logger(logger *slog.Logger) {{.Name}}Option {
 	return newFunc{{.Name}}Option(func(opts *{{lower_first_letter .Name}}Options) {
 		opts.Logger = logger
 	})
