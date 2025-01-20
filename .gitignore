@@ -105,3 +105,6 @@ go.work.sum
 .env
 
 dist/
+.semrel/
+.version
+.version-unreleased
