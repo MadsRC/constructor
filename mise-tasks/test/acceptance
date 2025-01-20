@@ -1,0 +1,15 @@
+#!/bin/sh
+#MISE description="Run acceptance tests"
+#USAGE arg "<file>" help="The path to the binary to test"
+
+set -e
+
+if test ! -f "$usage_file"; then
+  echo "The file '$usage_file' does not exist"
+  exit 1
+fi
+
+export CONSTRUCTOR_BIN_PATH=$(realpath "$usage_file")
+
+cd tests/acceptance
+go test -v -count=1 -timeout 30s .

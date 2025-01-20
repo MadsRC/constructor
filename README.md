@@ -34,3 +34,37 @@ To generate tests for the constructor, use the `--test` flag:
 ```bash
 constructor --name MyStruct --package mypackage --test
 ```
+
+## Build
+
+This project uses [mise](https://mise.jdx.dev) to manage dev tools, environments and tasks. To build the project, run
+the following command:
+
+```bash
+mise run build
+```
+
+This will result in a binary being created in the `dist/` directory.
+
+Alternatively, you can create a development/debug build by running:
+
+```bash
+mise run build --dev
+```
+
+This will create a binary with debug information.
+
+## Testing
+
+### Acceptance tests
+
+The acceptance test suite is written as a separate GoLang module in the [tests/acceptance](tests/acceptance) directory.
+To run the acceptance tests, you need to have a constructor binary built and available.
+
+To run the acceptance tests, run the following command:
+
+```bash
+mise run test:acceptance dist/constructor
+```
+
+The arguments passed here is the path to the constructor binary.

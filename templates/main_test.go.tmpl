@@ -62,7 +62,7 @@ func TestNew{{title .Name}}_GlobalOptions(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			Global{{.Name}}Options = []{{.Name}}Option{
+			Global{{title .Name}}Options = []{{.Name}}Option{
 				With{{title .Name}}Logger(tt.inputLogger),
 			}
 			got1, _ := New{{title .Name}}(tt.options...)
@@ -76,7 +76,7 @@ func TestNew{{title .Name}}_GlobalOptions(t *testing.T) {
 			if got1.options.Logger != got2.options.Logger {
 				t.Errorf("New{{title .Name}}() = %v, want %v", got1, got2)
 			}
-			Global{{.Name}}Options = []{{.Name}}Option{}
+			Global{{title .Name}}Options = []{{.Name}}Option{}
 			got3, _ := New{{title .Name}}(tt.options...)
 			if got3.options.Logger == tt.inputLogger {
 				t.Errorf("New{{title .Name}}() = %v, want %v", got3, slog.Default())

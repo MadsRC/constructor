@@ -19,7 +19,7 @@ var templates embed.FS
 func main() {
 	app := &cli.App{
 		Name:  "constructor",
-		Usage: "make something",
+		Usage: "A tool to generate constructor functions in the style of the functional options pattern for Go structs.",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "name",
@@ -29,7 +29,7 @@ func main() {
 			&cli.StringFlag{
 				Name:  "package",
 				Usage: "name of the package the generated code should belong to",
-				Value: "main",
+				Value: "client",
 			},
 			&cli.StringFlag{
 				Name:  "output",

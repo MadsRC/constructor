@@ -9,8 +9,8 @@ type {{ .Name }} struct {
 }
 
 // New{{title .Name}} creates a new [{{.Name}}].
-func New{{title .Name}}(options ...{{title .Name}}Option) (*{{.Name}}, error) {
-	opts := default{{.Name}}Options
+func New{{title .Name}}(options ...{{.Name}}Option) (*{{.Name}}, error) {
+	opts := default{{title .Name}}Options
 	for _, opt := range Global{{title .Name}}Options {
 		opt.apply(&opts)
 	}
@@ -31,7 +31,7 @@ var default{{title .Name}}Options = {{lower_first_letter .Name}}Options{
 	Logger:  slog.Default(),
 }
 
-// Global{{title .Name}}Options is a list of [ClientOption]s that are applied to all [Client]s.
+// Global{{title .Name}}Options is a list of [{{.Name}}Option]s that are applied to all [{{.Name}}]s.
 var Global{{title .Name}}Options []{{.Name}}Option
 
 // {{.Name}}Option is an option for configuring a [{{.Name}}].
@@ -39,25 +39,25 @@ type {{.Name}}Option interface {
 	apply(*{{lower_first_letter .Name}}Options)
 }
 
-// func{{.Name}}Option is a [{{.Name}}Option] that calls a function.
+// func{{title .Name}}Option is a [{{.Name}}Option] that calls a function.
 // It is used to wrap a function, so it satisfies the [{{.Name}}Option] interface.
-type func{{.Name}}Option struct {
+type func{{title .Name}}Option struct {
 	f func(* {{lower_first_letter .Name}}Options)
 }
 
-func (fdo *func{{.Name}}Option) apply(opts *{{lower_first_letter .Name}}Options) {
+func (fdo *func{{title .Name}}Option) apply(opts *{{lower_first_letter .Name}}Options) {
 	fdo.f(opts)
 }
 
-func newFunc{{.Name}}Option(f func(*{{lower_first_letter .Name}}Options)) *func{{.Name}}Option {
-	return &func{{.Name}}Option{
+func newFunc{{title .Name}}Option(f func(*{{lower_first_letter .Name}}Options)) *func{{title .Name}}Option {
+	return &func{{title .Name}}Option{
 		f: f,
 	}
 }
 
 // With{{title .Name}}Logger returns a [{{.Name}}Option] that uses the provided logger.
 func With{{title .Name}}Logger(logger *slog.Logger) {{.Name}}Option {
-	return newFunc{{.Name}}Option(func(opts *{{lower_first_letter .Name}}Options) {
+	return newFunc{{title .Name}}Option(func(opts *{{lower_first_letter .Name}}Options) {
 		opts.Logger = logger
 	})
 }
