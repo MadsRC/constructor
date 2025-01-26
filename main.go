@@ -15,8 +15,14 @@ import (
 
 //go:embed templates/*
 var templates embed.FS
+var version string
+var commit string
+var date string
 
 func main() {
+	cli.VersionPrinter = func(cCtx *cli.Context) {
+		fmt.Printf("Constructor version %s\nVCS commit %s\nBuild timestamp %s\n", cCtx.App.Version, commit, date)
+	}
 	app := &cli.App{
 		Name:  "constructor",
 		Usage: "A tool to generate constructor functions in the style of the functional options pattern for Go structs.",
@@ -40,7 +46,8 @@ func main() {
 				Usage: "output tests for the generated code, instead of the code itself. Uses the output flag to determine the output file",
 			},
 		},
-		Action: mainAction,
+		Action:  mainAction,
+		Version: version,
 	}
 
 	if err := app.Run(os.Args); err != nil {

@@ -1,0 +1,14 @@
+#!/bin/sh
+#MISE description="Detect the next version of the cli"
+#USAGE flag "-l --local" help="Provide when running locally"
+
+rm -rf .version
+rm -rf .version-unreleased
+
+semantic-release --dry --version-file --allow-no-changes ${usage_local:+-t} ${usage_local:+"$(gh auth token)"} ${usage_local:+--provider-opt} ${usage_local:+'slug=MadsRC/constructor'} ${usage_local:+--no-ci}
+
+if test -f .version-unreleased; then
+  printf "Version: %s" "$(cat .version-unreleased)"
+  printf "Next version can be found in the .version-unreleased file\n"
+  exit 0
+fi
