@@ -10,6 +10,7 @@ jobs:
       contents: read
     outputs:
       version: ${{ steps.detect-version.outputs.version }}
+      should_release: ${{ steps.detect-version.outputs.should_release }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
