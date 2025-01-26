@@ -9,6 +9,23 @@ import (
 	"testing"
 )
 
+func init() {
+	_, ok := os.LookupEnv("CONSTRUCTOR_BIN_PATH")
+	if !ok {
+		tmpDir := os.TempDir()
+		cmd := exec.Command("go", "build", "-o", tmpDir+"/constructor", ".")
+		cmd.Dir = "../.."
+		err := cmd.Run()
+		if err != nil {
+			panic(err)
+		}
+		err = os.Setenv("CONSTRUCTOR_BIN_PATH", tmpDir+"/constructor")
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
 func ensureBinPath(t *testing.T) string {
 	t.Helper()
 	path, ok := os.LookupEnv("CONSTRUCTOR_BIN_PATH")
@@ -112,4 +129,26 @@ func TestBasicAcceptance_with_output_parameter(t *testing.T) {
 	assert.NoError(t, err)
 	require.Empty(t, errb2.String())
 	require.Contains(t, outb2.String(), "ok  \tacceptance")
+}
+
+// This regression test is to ensure that a bug is not reintroduced that caused the generated code to not have the
+// correct title casing of the name parameter. This happened because the functionality that would ensure the first
+// letter of a string was capitalized had an issue that caused it to make the first letter of the string uppercase and
+// the rest of the string lowercase. If provided the string "fiskePinde" it would return "Fiskepinde" instead of the
+// expected "FiskePinde".
+func TestRegression_title(t *testing.T) {
+	binPath := ensureBinPath(t)
+	dir := t.TempDir()
+	createModule(t, dir)
+	var outb, errb bytes.Buffer
+
+	args := []string{"--name", "fiskePinde"}
+	cmd := exec.Command(binPath, args...)
+	cmd.Stdout = &outb
+	cmd.Stderr = &errb
+	err := cmd.Run()
+	assert.NoError(t, err)
+	require.Empty(t, errb.String())
+	require.NotContains(t, outb.String(), "WithFiskepindeLogger(", "Function name should be WithFiskePindeLogger, not WithFiskepindeLogger")
+	require.Contains(t, outb.String(), "WithFiskePindeLogger(", "Function name should be WithFiskePindeLogger")
 }

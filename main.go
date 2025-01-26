@@ -61,6 +61,17 @@ type tmplInput struct {
 	Name        string
 }
 
+func titleFunc(s string) string {
+	return cases.Title(language.English).String(s[0:1]) + s[1:]
+}
+
+func lowerFirstLetterFunc(s string) string {
+	if len(s) < 1 {
+		return cases.Lower(language.English).String(s)
+	}
+	return cases.Lower(language.English).String(s[:1]) + s[1:]
+}
+
 func mainAction(c *cli.Context) error {
 	if c.String("name") == "" {
 		return fmt.Errorf("provided \"name\" value is invalid: '%s' - Use '--name' to set it", c.String("name"))
@@ -69,15 +80,8 @@ func mainAction(c *cli.Context) error {
 		return fmt.Errorf("provided \"package\" value is invalid: '%s' - Use '--package' to set it", c.String("package"))
 	}
 	funcMap := template.FuncMap{
-		"title": func(s string) string {
-			return cases.Title(language.English).String(s)
-		},
-		"lower_first_letter": func(s string) string {
-			if len(s) < 1 {
-				return cases.Lower(language.English).String(s)
-			}
-			return cases.Lower(language.English).String(s[:1]) + s[1:]
-		},
+		"title":              titleFunc,
+		"lower_first_letter": lowerFirstLetterFunc,
 	}
 
 	tmpl, err := determineTemplate(c, funcMap)
