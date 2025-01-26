@@ -5,10 +5,20 @@
 rm -rf .version
 rm -rf .version-unreleased
 
-semantic-release --dry --version-file --allow-no-changes ${usage_local:+-t} ${usage_local:+"$(gh auth token)"} ${usage_local:+--provider-opt} ${usage_local:+'slug=MadsRC/constructor'} ${usage_local:+--no-ci}
+srOutfile=$(mktemp)
+
+semantic-release --dry --version-file --allow-no-changes ${usage_local:+-t} ${usage_local:+"$(gh auth token)"} ${usage_local:+--provider-opt} ${usage_local:+'slug=MadsRC/constructor'} ${usage_local:+--no-ci} >> $srOutfile 2>&1
+
+if [ $? -ne 0 ]; then
+  printf "Something went wrong, dumping 'semantic-release' output:\n"
+  cat "$srOutfile"
+  exit 2
+fi
 
 if test -f .version-unreleased; then
-  printf "Version: %s" "$(cat .version-unreleased)"
-  printf "Next version can be found in the .version-unreleased file\n"
+  cat .version-unreleased
   exit 0
+else
+  printf "No new version detected\n"
+  exit 1
 fi

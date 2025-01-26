@@ -4,14 +4,80 @@ on:
     branches:
       - main
 jobs:
-  release:
+  detect-version:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
+    outputs:
+      version: ${{ steps.detect-version.outputs.version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
-      - run:  semantic-release --allow-no-changes
+      - id: detect-version
+        run: |
+          mise run detect-next-version
+          if [ -f .version-unreleased ]; then
+            echo "should_release=true" >> $GITHUB_OUTPUT
+            echo "version=$(cat .version-unreleased)" >> $GITHUB_OUTPUT
+          else
+            echo "should_release=false" >> $GITHUB_OUTPUT
+          fi
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs: detect-version
+    if: ${{ needs.detect-version.outputs.should_release == 'true' }}
+    matrix:
+      goos: [linux, darwin]
+      goarch: [amd64, arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: mise run build --os "${{ matrix.goos }}" --arch "${{ matrix.goarch }}" --version "${{ needs.detect-version.outputs.version }}"
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/constructor-${{ matrix.goos }}-${{ matrix.goarch }}
+          retention-days: 1
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs: build
+    matrix:
+      goos: [linux, darwin]
+      goarch: [amd64, arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: binaries-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist
+      - uses: jdx/mise-action@v2
+      - run: mise run test:acceptance --file dist/constructor-${{ matrix.goos }}-${{ matrix.goarch }}
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: binaries-*
+          path: dist
+          merge-multiple: 'true'
+      - uses: jdx/mise-action@v2
+      - run:  mise run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,5 @@
+#!/bin/sh
+#MISE description="Detect the next version of the cli"
+#USAGE flag "-l --local" help="Provide when running locally"
+
+semantic-release --version-file --allow-no-changes ${usage_local:+-t} ${usage_local:+"$(gh auth token)"} ${usage_local:+--provider-opt} ${usage_local:+'slug=MadsRC/constructor'} ${usage_local:+--no-ci} --hooks goreleaser

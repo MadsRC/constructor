@@ -1,0 +1,26 @@
+builds:
+  - # Set the builder to prebuilt
+    builder: prebuilt
+
+    # When builder is `prebuilt` there are no defaults for goos, goarch,
+    # goarm, gomips, goamd64 and targets, so you always have to specify them:
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    goamd64:
+      - v1
+
+    # prebuilt specific options
+    prebuilt:
+      # Path must be the template path to the binaries.
+      # GoReleaser removes the `dist` directory before running, so you will likely
+      # want to put the binaries elsewhere.
+      # This field is required when using the `prebuilt` builder.
+      path: dist/constructor-{{ .Os }}-{{ .Arch }}
+
+    # Use 'binary' to set the final name of your binary.
+    # This is the name that will be used in archives et al.
+    binary: bin/constructor
