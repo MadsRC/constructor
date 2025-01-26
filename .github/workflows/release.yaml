@@ -12,6 +12,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
-      - run:  semantic-release
+      - run:  semantic-release --allow-no-changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
