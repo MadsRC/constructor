@@ -15,6 +15,3 @@ jobs:
       - run:  semantic-release --allow-no-changes --hooks goreleaser
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: goreleaser release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
