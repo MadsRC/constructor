@@ -29,9 +29,10 @@ jobs:
       contents: read
     needs: detect-version
     if: ${{ needs.detect-version.outputs.should_release == 'true' }}
-    matrix:
-      goos: [linux, darwin]
-      goarch: [amd64, arm64]
+    strategy:
+      matrix:
+        goos: [linux, darwin]
+        goarch: [amd64, arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -52,9 +53,10 @@ jobs:
     permissions:
       contents: read
     needs: build
-    matrix:
-      goos: [linux, darwin]
-      goarch: [amd64, arm64]
+    strategy:
+      matrix:
+        goos: [linux, darwin]
+        goarch: [amd64, arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
