@@ -67,7 +67,7 @@ jobs:
           name: binaries-${{ matrix.goos }}-${{ matrix.goarch }}
           path: dist
       - uses: jdx/mise-action@v2
-      - run: mise run test:acceptance --file dist/constructor-${{ matrix.goos }}-${{ matrix.goarch }}
+      - run: mise run test:acceptance dist/constructor-${{ matrix.goos }}-${{ matrix.goarch }}
   release:
     runs-on: ubuntu-latest
     permissions:
