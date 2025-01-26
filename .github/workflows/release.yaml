@@ -51,23 +51,22 @@ jobs:
           path: dist/constructor-${{ matrix.goos }}-${{ matrix.goarch }}
           retention-days: 1
   test:
+    # Right now we only test on linux/amd64 until we have access to more runners.
     runs-on: ubuntu-latest
     permissions:
       contents: read
     needs: build
-    strategy:
-      matrix:
-        goos: [linux, darwin]
-        goarch: [amd64, arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: binaries-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: binaries-linux-amd64
           path: dist
       - uses: jdx/mise-action@v2
-      - run: mise run test:acceptance dist/constructor-${{ matrix.goos }}-${{ matrix.goarch }}
+      - run: |
+          chmod +x dist/constructor-linux-amd64
+          mise run test:acceptance dist/constructor-linux-amd64
   release:
     runs-on: ubuntu-latest
     permissions:
