@@ -4,6 +4,8 @@ import (
 	"io"
 	"log/slog"
 	"testing"
+	
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewGenerator(t *testing.T) {
@@ -45,6 +47,36 @@ func TestNewGenerator(t *testing.T) {
 				t.Errorf("NewGenerator() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestTitleFunc(t *testing.T) {
+	g, err := NewGenerator()
+	require.NoError(t, err)
+
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"client", "Client"},
+		{"fiskePinde", "FiskePinde"},
+		{"a", "A"},
+		{"", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			result := g.options.TitleFunc(tt.input)
+			require.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func BenchmarkTitleFunc(b *testing.B) {
+	g, _ := NewGenerator()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		g.options.TitleFunc("fiskePinde")
 	}
 }
 
