@@ -7,6 +7,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 	"github.com/MadsRC/constructor/internal/generator"
+	"github.com/MadsRC/constructor/internal/mcp"
 )
 var version string
 var commit string
@@ -38,6 +39,13 @@ func main() {
 			},
 		},
 		Action: mainAction,
+		Commands: []*cli.Command{
+			{
+				Name:   "mcp",
+				Usage:  "Start the MCP server",
+				Action: mcpAction,
+			},
+		},
 	}
 
 	if err := cmd.Run(context.Background(), os.Args); err != nil {
@@ -71,4 +79,24 @@ func mainAction(ctx context.Context, cmd *cli.Command) error {
 		cmd.Bool("test"),
 		cmd.String("output"),
 	)
+}
+
+func mcpAction(ctx context.Context, cmd *cli.Command) error {
+	// Create generator with default options
+	gen, err := generator.NewGenerator()
+	if err != nil {
+		return fmt.Errorf("generator initialization failed: %w", err)
+	}
+
+	// Create server with injected generator and version info
+	srv, err := mcp.NewServer(
+		mcp.WithServerGenerator(gen),
+		mcp.WithServerVersion(version),
+	)
+	if err != nil {
+		return fmt.Errorf("server initialization failed: %w", err)
+	}
+
+	// Start serving
+	return srv.ServeStdio()
 }
