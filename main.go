@@ -21,14 +21,10 @@ var commit string
 var date string
 
 func main() {
-	app := &cli.App{
+	cmd := &cli.Command{
 		Name:  "constructor",
 		Usage: "A tool to generate constructor functions in the style of the functional options pattern for Go structs.",
-		VersionInfo: cli.VersionInfo{
-			Version:   version,
-			Commit:    commit,
-			BuildDate: date,
-		},
+		Version: fmt.Sprintf("%s (commit: %s, date: %s)", version, commit, date),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "name",
@@ -52,7 +48,7 @@ func main() {
 		Action: mainAction,
 	}
 
-	if err := app.Run(context.Background(), os.Args); err != nil {
+	if err := cmd.Run(context.Background(), os.Args); err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
 	}
