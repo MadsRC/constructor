@@ -1,10 +1,12 @@
 package mcp
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 
 	"github.com/MadsRC/constructor/internal/generator"
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
 
@@ -28,12 +30,15 @@ func NewServer(options ...ServerOption) (*Server, error) {
 		return nil, fmt.Errorf("must provide generator through WithServerGenerator option")
 	}
 
-	mcpServer := server.NewMCPServer("constructor", opts.Version)
-
-	return &Server{
-		server:  mcpServer,
+	s := &Server{
 		options: &opts,
-	}, nil
+	}
+
+	mcpServer := server.NewMCPServer("constructor", opts.Version)
+	mcpServer.AddTool(constructorTool, s.callConstructor)
+
+	s.server = mcpServer
+	return s, nil
 }
 
 type serverOptions struct {
@@ -96,3 +101,41 @@ func WithServerGenerator(generator *generator.Generator) ServerOption {
 func (s *Server) ServeStdio() error {
 	return server.ServeStdio(s.server)
 }
+
+func (s *Server) callConstructor(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	pkgName := request.Params.Arguments["package"].(string)
+	typeName := request.Params.Arguments["name"].(string)
+	isTest := request.Params.Arguments["test"].(bool)
+	output := request.Params.Arguments["output"].(string)
+
+	err := s.options.Generator.Generate(pkgName, typeName, isTest, output)
+	if err != nil {
+		return mcp.NewToolResultErrorFromErr("unable to generate constructor", err), nil
+	}
+
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{mcp.TextContent{
+			Type: "text",
+			Text: fmt.Sprintf("Generated constructor for %s in %s", typeName, pkgName),
+		}},
+	}, nil
+}
+
+var constructorTool = mcp.NewTool("constructor",
+	mcp.WithDescription("Generate golang constructors using the functional options pattern"),
+	mcp.WithString("name",
+		mcp.Required(),
+		mcp.Description("The name of the struct to generate"),
+	),
+	mcp.WithString("package",
+		mcp.Required(),
+		mcp.Description("The package to generate the struct in"),
+	),
+	mcp.WithString("output",
+		mcp.Required(),
+		mcp.Description("The output file to write the generated code to"),
+	),
+	mcp.WithBoolean("test",
+		mcp.Description("Generate a test file instead of a source file"),
+	),
+)
