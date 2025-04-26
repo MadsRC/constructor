@@ -1,8 +1,10 @@
 package mcp
 
 import (
+	"fmt"
 	"log/slog"
 
+	"github.com/MadsRC/constructor/internal/generator"
 	"github.com/mark3labs/mcp-go/server"
 )
 
@@ -21,6 +23,11 @@ func NewServer(options ...ServerOption) (*Server, error) {
 		opt.apply(&opts)
 	}
 
+	// Add validation check
+	if opts.Generator == nil {
+		return nil, fmt.Errorf("must provide generator through WithServerGenerator option")
+	}
+
 	mcpServer := server.NewMCPServer("constructor", opts.Version)
 
 	return &Server{
@@ -30,8 +37,9 @@ func NewServer(options ...ServerOption) (*Server, error) {
 }
 
 type serverOptions struct {
-	Logger  *slog.Logger
-	Version string
+	Logger    *slog.Logger
+	Version   string
+	Generator *generator.Generator // New required field
 }
 
 var defaultServerOptions = serverOptions{
@@ -74,6 +82,13 @@ func WithServerLogger(logger *slog.Logger) ServerOption {
 func WithServerVersion(version string) ServerOption {
 	return newFuncServerOption(func(opts *serverOptions) {
 		opts.Version = version
+	})
+}
+
+// WithServerGenerator returns a [ServerOption] that provides a generator instance
+func WithServerGenerator(generator *generator.Generator) ServerOption {
+	return newFuncServerOption(func(opts *serverOptions) {
+		opts.Generator = generator
 	})
 }
 
