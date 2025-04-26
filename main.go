@@ -2,20 +2,12 @@ package main
 
 import (
 	"context"
-	"embed"
 	"fmt"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
-	"io"
 	"os"
-	"path/filepath"
-	"text/template"
 
 	"github.com/urfave/cli/v3"
+	"github.com/yourusername/constructor/internal/generator"
 )
-
-//go:embed templates/*
-var templates embed.FS
 var version string
 var commit string
 var date string
@@ -54,88 +46,29 @@ func main() {
 	}
 }
 
-type tmplInput struct {
-	PackageName string
-	Name        string
-}
-
-func titleFunc(s string) string {
-	return cases.Title(language.English).String(s[0:1]) + s[1:]
-}
-
-func lowerFirstLetterFunc(s string) string {
-	if len(s) < 1 {
-		return cases.Lower(language.English).String(s)
-	}
-	return cases.Lower(language.English).String(s[:1]) + s[1:]
-}
 
 func mainAction(ctx context.Context, cmd *cli.Command) error {
-	if cmd.String("name") == "" {
-		return fmt.Errorf("provided \"name\" value is invalid: '%s' - Use '--name' to set it", cmd.String("name"))
+	name := cmd.String("name")
+	if name == "" {
+		return fmt.Errorf("provided \"name\" value is invalid: '%s' - Use '--name' to set it", name)
 	}
-	if cmd.String("package") == "" {
-		return fmt.Errorf("provided \"package\" value is invalid: '%s' - Use '--package' to set it", cmd.String("package"))
-	}
-	funcMap := template.FuncMap{
-		"title":              titleFunc,
-		"lower_first_letter": lowerFirstLetterFunc,
+	
+	pkg := cmd.String("package")
+	if pkg == "" {
+		return fmt.Errorf("provided \"package\" value is invalid: '%s' - Use '--package' to set it", pkg)
 	}
 
-	tmpl, err := determineTemplate(cmd, funcMap)
+	// Create generator with default options
+	gen, err := generator.NewGenerator()
 	if err != nil {
-		return fmt.Errorf("error determining template: %w", err)
+		return fmt.Errorf("generator initialization failed: %w", err)
 	}
 
-	input := tmplInput{
-		PackageName: cmd.String("package"),
-		Name:        cmd.String("name"),
-	}
-
-	output, err := determineOutput(cmd)
-	if err != nil {
-		return fmt.Errorf("error determining output destination: %w", err)
-	}
-
-	err = tmpl.Execute(output, input)
-	if err != nil {
-		return fmt.Errorf("error executing template: %w", err)
-	}
-
-	return nil
-}
-
-func determineTemplate(cmd *cli.Command, funcMap template.FuncMap) (*template.Template, error) {
-	var tmplContent []byte
-	var err error
-	if cmd.Bool("test") {
-		tmplContent, err = templates.ReadFile("templates/main_test.go.tmpl")
-	} else {
-		tmplContent, err = templates.ReadFile("templates/main.go.tmpl")
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	tmpl, err := template.New("constructor").Funcs(funcMap).Parse(string(tmplContent))
-
-	return tmpl, err
-}
-
-func determineOutput(cmd *cli.Command) (io.Writer, error) {
-	var output io.Writer
-	if cmd.String("output") == "" || cmd.String("output") == "-" {
-		output = os.Stdout
-	} else {
-		err := os.MkdirAll(filepath.Dir(cmd.String("output")), os.ModePerm)
-		if err != nil {
-			return nil, err
-		}
-		output, err = os.Create(cmd.String("output"))
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return output, nil
+	// Delegate generation to the package
+	return gen.Generate(
+		pkg,
+		name,
+		cmd.Bool("test"),
+		cmd.String("output"),
+	)
 }
