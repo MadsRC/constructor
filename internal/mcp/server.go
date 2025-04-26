@@ -103,10 +103,10 @@ func (s *Server) ServeStdio() error {
 }
 
 func (s *Server) callConstructor(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	pkgName := request.Params.Arguments["package"].(string)
-	typeName := request.Params.Arguments["name"].(string)
+	pkgName := mcp.ParseString(request, "package", "")
+	typeName := mcp.ParseString(request, "name", "")
 	isTest := mcp.ParseBoolean(request, "test", false)
-	output := request.Params.Arguments["output"].(string)
+	output := mcp.ParseString(request, "output", "")
 
 	err := s.options.Generator.Generate(pkgName, typeName, isTest, output)
 	if err != nil {
