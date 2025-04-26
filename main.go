@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/urfave/cli/v3"
-	"github.com/yourusername/constructor/internal/generator"
+	"github.com/MadsRC/constructor/internal/generator"
 )
 var version string
 var commit string
