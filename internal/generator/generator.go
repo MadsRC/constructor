@@ -45,6 +45,9 @@ type generatorOptions struct {
 var defaultGeneratorOptions = generatorOptions{
 	Logger:  slog.Default(),
 	TitleFunc: func(s string) string {
+		if len(s) == 0 {
+			return ""
+		}
 		return cases.Title(language.English).String(s[0:1]) + s[1:]
 	},
 	LowerFirstLetterFunc: func(s string) string {
